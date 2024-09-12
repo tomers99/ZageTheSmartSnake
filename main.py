@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 import copy
-import time
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -21,6 +21,32 @@ head_speed = 700
 head_color = (100,0,0)
 head = pygame.Rect(head_position[0], head_position[1], square_size[0], square_size[1])
 head_is_moving = 0
+
+# Heads fov
+fov_jump = 15
+fov_radi = 195
+fov_start = [head.center[0] - square_size[0]/2 - fov_radi/2, head.center[1] - square_size[1]/2 - fov_radi/2]
+
+k = int(fov_radi/fov_jump)
+fov_points = [[[0, 0] for _ in range(k)] for _ in range(k)]
+
+def update_fov():
+    if head_is_moving == True:
+        for i, row in enumerate(fov_points):
+            for j, column in enumerate(row):
+                fov_points[i][j] = [fov_start[0] + j * fov_jump, fov_start[1] + i * fov_jump]
+                fov_rects[i][j].center = fov_points[i,j]
+
+fov_rects = [[[0, 0] for _ in range(k)] for _ in range(k)]
+
+for i, row in enumerate(fov_rects):
+    for j, column in enumerate(row):
+        fov_rects[i][j] = pygame.Rect(fov_points[i][j][0], fov_points[i][j][1], 2, 2)
+
+def draw_fov_rects():
+    for i, row in enumerate(fov_rects):
+        for j, column in enumerate(row):
+            pygame.draw.rect(window,(40,40,40),fov_rects[i][j])
 
 def head_is_moving_updater():
     global head_is_moving
@@ -77,7 +103,7 @@ class Game_Object:
 # Food properties
 class Food(Game_Object):
     size = [30, 30]
-    number = 100
+    number = random.randint(70,130)
     color = (random.randint(200,245),random.randint(150,200),random.randint(40,100))
     list = []
 
@@ -88,6 +114,7 @@ class Obstacle(Game_Object):
     color = (random.randint(30,80),random.randint(0,50),random.randint(130,255))
     list = []
 
+    @staticmethod
     def head_obstacle_collisions_hander():
         global head_position
         for obstacle in Obstacle.list:
@@ -120,13 +147,6 @@ pygame.display.set_caption("Snake Game Grid")
 # Create a clock object
 clock = pygame.time.Clock()
 dt = 0
-
-time_taken_pairs_list = []
-total_time_pairs_list = []
-average_time_pairs_list = []
-
-total_time = 0
-ticks = 0
 
 # Main loop
 while True:
@@ -169,13 +189,13 @@ while True:
     # print("previous head position was: " + str(head_past_self.topleft))
     # print("current head poistion is: " + str(head.topleft))
 
-    start_time = time.perf_counter()
     # Head-food collision
     if head_is_moving:
         for food in Food.list:
             if head.colliderect(food.rect):
                 food.generate_position()
-    end_time = time.perf_counter()
+
+    update_fov()
 
         # Draw the head
     pygame.draw.rect(window, head_color, head)
@@ -188,35 +208,10 @@ while True:
     for obstacle in Obstacle.list:
         pygame.draw.rect(window, obstacle.color, obstacle.rect)
 
+    # Tests
+    draw_fov_rects()
+
     # Update the display
     pygame.display.flip()
 
     dt = clock.tick(60)/1000
-
-    total_time += end_time-start_time
-    ticks += 1
-    average_time = total_time/ticks
-
-    time_taken_pairs_list.append((ticks, end_time-start_time))
-    total_time_pairs_list.append((ticks, total_time))
-    average_time_pairs_list.append((ticks, average_time))
-
-    print(f"Time Taken: {end_time-start_time:.8f} seconds")
-    print(f"Total Time: {total_time:.8f} seconds")
-    print(f"Average Time: {average_time:.8f} seconds")
-
-    with open('fun1.txt', 'w') as f1:
-        # Write each tuple as a line in the file
-        for item in time_taken_pairs_list:
-            f1.write(f"{item}\n")
-
-    with open('fun2.txt', 'w') as f2:
-        # Write each tuple as a line in the file
-        for item in total_time_pairs_list:
-            f2.write(f"{item}\n")
-
-    with open('fun3.txt', 'w') as f3:
-        # Write each tuple as a line in the file
-        for item in average_time_pairs_list:
-            f3.write(f"{item}\n")
-
