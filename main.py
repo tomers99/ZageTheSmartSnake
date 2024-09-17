@@ -23,36 +23,57 @@ head = pygame.Rect(head_position[0], head_position[1], square_size[0], square_si
 head_is_moving = 0
 
 # Heads fov
-fov_jump = 15
-fov_radi = 195
-fov_start = [head.center[0] - square_size[0]/2 - fov_radi/2, head.center[1] - square_size[1]/2 - fov_radi/2]
 
-k = int(fov_radi/fov_jump)
-fov_points = [[[0, 0] for _ in range(k)] for _ in range(k)]
+class Fovp:
+    jump = 15
+    diameter = 195
+    start = [head.center[0] - diameter/2, head.center[1] - diameter/2]
+    k = int(diameter/jump) +1
+    lattice = None
 
-def update_fov():
-    if head_is_moving == True:
-        for i, row in enumerate(fov_points):
+    def __init__(self):
+        self.position = [0,0]
+        self.rect = pygame.Rect(self.position[0], self.position[1], 2, 2)
+        self.detects = "nothing"
+        self.color = (40,40,40)
+
+    @classmethod
+    def create_lattice(cls):
+        cls.lattice = [[[0, 0] for _ in range(cls.k)] for _ in range(cls.k)]
+        for i, row in enumerate(cls.lattice):
             for j, column in enumerate(row):
-                fov_points[i][j] = [fov_start[0] + j * fov_jump, fov_start[1] + i * fov_jump]
-                fov_rects[i][j].center = fov_points[i,j]
+                cls.lattice[i][j] = Fovp()
 
-fov_rects = [[[0, 0] for _ in range(k)] for _ in range(k)]
+    @staticmethod
+    def update():
+        if head_is_moving == True or l == 0:
+            Fovp.start = [head.center[0] - Fovp.diameter/2, head.center[1] - Fovp.diameter/2]
+            for i, row in enumerate(Fovp.lattice):
+                for j, column in enumerate(row):
+                    Fovp.lattice[i][j].position = [Fovp.start[0] + j * Fovp.jump, Fovp.start[1] + i * Fovp.jump]
+                    Fovp.lattice[i][j].rect.center = Fovp.lattice[i][j].position
+                    Fovp.lattice[i][j].scan()
 
-for i, row in enumerate(fov_rects):
-    for j, column in enumerate(row):
-        fov_rects[i][j] = pygame.Rect(fov_points[i][j][0], fov_points[i][j][1], 2, 2)
+    @staticmethod
+    def draw():
+        for i, row in enumerate(Fovp.lattice):
+            for j, column in enumerate(row):
+                pygame.draw.rect(window, Fovp.lattice[i][j].color, Fovp.lattice[i][j].rect)
 
-def draw_fov_rects():
-    for i, row in enumerate(fov_rects):
-        for j, column in enumerate(row):
-            pygame.draw.rect(window,(40,40,40),fov_rects[i][j])
+    def scan(self):
+        self.detecs = "None"
+        self.color = (40, 40, 40)
+        for obstacle in Obstacle.list:
+            if obstacle.rect.collidepoint(self.position):
+                self.detecs = "obstacle"
+                self.color = (200,200,200)
+
+Fovp.create_lattice()
+l = 0
 
 def head_is_moving_updater():
     global head_is_moving
-    if head_is_moving < 3:
-        head_is_moving += 1
-    else: head_is_moving = 0
+    head_is_moving = True
 
 def head_updater():
     head.topleft = head_position
@@ -147,7 +168,6 @@ pygame.display.set_caption("Snake Game Grid")
 # Create a clock object
 clock = pygame.time.Clock()
 dt = 0
-
 # Main loop
 while True:
 
@@ -195,8 +215,6 @@ while True:
             if head.colliderect(food.rect):
                 food.generate_position()
 
-    update_fov()
-
         # Draw the head
     pygame.draw.rect(window, head_color, head)
 
@@ -208,10 +226,14 @@ while True:
     for obstacle in Obstacle.list:
         pygame.draw.rect(window, obstacle.color, obstacle.rect)
 
-    # Tests
-    draw_fov_rects()
+    # fov
+    Fovp.update()
+    Fovp.draw()
+
+    l = 1
 
     # Update the display
     pygame.display.flip()
 
     dt = clock.tick(60)/1000
+
