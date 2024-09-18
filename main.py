@@ -3,6 +3,7 @@ import sys
 import random
 import copy
 import math
+import itertools
 
 # Initialize Pygame
 pygame.init()
@@ -22,14 +23,39 @@ head_color = (100,0,0)
 head = pygame.Rect(head_position[0], head_position[1], square_size[0], square_size[1])
 head_is_moving = 0
 
+actions = {
+    "up": None,
+    "down": None,
+    "left": None,
+    "right": None,
+    "random": None,
+}
+
+states = {
+    "food",
+    "obstacle",
+    "border",
+    "nothing",
+}
+
+SA = set()
+for x in itertools.product(states, actions):
+    SA.add(x)
+
 # Heads fov
 
+fov_diameter = 168
+
 class Fovp:
-    jump = 15
-    diameter = 195
+    jump = 14
+    diameter = fov_diameter
     start = [head.center[0] - diameter/2, head.center[1] - diameter/2]
     k = int(diameter/jump) +1
-    lattice = None
+    lattice = []
+    list = []
+    rect = pygame.Rect(0,0,fov_diameter,fov_diameter)
+    suspicious_food = []
+    suspicious_obstacles = []
 
     def __init__(self):
         self.position = [0,0]
@@ -37,39 +63,88 @@ class Fovp:
         self.detects = "nothing"
         self.color = (40,40,40)
 
+        self.SAW = {}
+
+        for x in SA:
+            self.SAW[x] = 0
+
+        self.update_weights()
+
+    def update_weights(self):
+        for x in self.SAW:
+            self.SAW[x] = random.randint(0,100)
+
     @classmethod
     def create_lattice(cls):
         cls.lattice = [[[0, 0] for _ in range(cls.k)] for _ in range(cls.k)]
         for i, row in enumerate(cls.lattice):
             for j, column in enumerate(row):
                 cls.lattice[i][j] = Fovp()
+                cls.list.append(cls.lattice[i][j])
 
     @staticmethod
     def update():
         if head_is_moving == True or l == 0:
             Fovp.start = [head.center[0] - Fovp.diameter/2, head.center[1] - Fovp.diameter/2]
+
             for i, row in enumerate(Fovp.lattice):
                 for j, column in enumerate(row):
                     Fovp.lattice[i][j].position = [Fovp.start[0] + j * Fovp.jump, Fovp.start[1] + i * Fovp.jump]
                     Fovp.lattice[i][j].rect.center = Fovp.lattice[i][j].position
+
+            Fovp.update_suspicions()
+
+            for i, row in enumerate(Fovp.lattice):
+                for j, column in enumerate(row):
                     Fovp.lattice[i][j].scan()
 
-    @staticmethod
-    def draw():
         for i, row in enumerate(Fovp.lattice):
             for j, column in enumerate(row):
-                pygame.draw.rect(window, Fovp.lattice[i][j].color, Fovp.lattice[i][j].rect)
+                Fovp.lattice[i][j].draw()
+
+
+    @staticmethod
+    def update_suspicions():
+        Fovp.rect.topleft = Fovp.start
+        Fovp.suspicious_food.clear()
+        Fovp.suspicious_obstacles.clear()
+
+        for obstacle in Obstacle.list:
+            if obstacle.rect.colliderect(Fovp.rect):
+                Fovp.suspicious_obstacles.append(obstacle)
+        for food in Food.list:
+            if food.rect.colliderect(Fovp.rect):
+               Fovp.suspicious_food.append(food)
+
+    def draw(self):
+        pygame.draw.rect(window, self.color, self.rect)
 
     def scan(self):
+
         self.detecs = "None"
         self.color = (40, 40, 40)
-        for obstacle in Obstacle.list:
+
+        noob = 0
+        for obstacle in self.suspicious_obstacles:
             if obstacle.rect.collidepoint(self.position):
                 self.detecs = "obstacle"
                 self.color = (200,200,200)
+                noob = 1
+                break
+        if noob == 0:
+            for food in self.suspicious_food:
+                if food.rect.collidepoint(self.position):
+                    self.detecs = "food"
+                    self.color = (230,0,0)
+                    break
 
 Fovp.create_lattice()
 l = 0
+
+for i,point in enumerate(Fovp.list):
+    print (f"this is point {i}, its SAW function is {point.SAW.items()}")
+
+breakpoint()
 
 def head_is_moving_updater():
     global head_is_moving
@@ -157,6 +232,7 @@ class Obstacle(Game_Object):
                     head_position = [head_position[0], obstacle.rect.top - square_size[1]]
                     head.topleft = head_position
 
+
 # Creating shit
 Obstacle.create(Obstacle)
 Food.create(Food)
@@ -228,7 +304,6 @@ while True:
 
     # fov
     Fovp.update()
-    Fovp.draw()
 
     l = 1
 
