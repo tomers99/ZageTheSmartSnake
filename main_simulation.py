@@ -19,7 +19,7 @@ window_rect = pygame.Rect(0,0,window_width,window_height)
 
 # Snake's head
 head_position = [400,400]
-head_speed = 2000
+head_speed = 700
 head_color = (100,0,0)
 head_size = (15,15)
 head = pygame.Rect(head_position[0], head_position[1], head_size[0], head_size[1])
@@ -63,7 +63,6 @@ class Fovp:
 
     def __init__(self):
         self.position = [0,0]
-        self.rect = pygame.Rect(self.position[0], self.position[1], 2, 2)
         self.color = (40, 40, 40)
 
         self.detects = "nothing"
@@ -95,17 +94,12 @@ class Fovp:
             for i, row in enumerate(Fovp.lattice):
                 for j, column in enumerate(row):
                     Fovp.lattice[i][j].position = [Fovp.start[0] + j * Fovp.jump, Fovp.start[1] + i * Fovp.jump]
-                    Fovp.lattice[i][j].rect.center = Fovp.lattice[i][j].position
 
             Fovp.update_suspicions()
 
             for i, row in enumerate(Fovp.lattice):
                 for j, column in enumerate(row):
                     Fovp.lattice[i][j].scan()
-
-        for i, row in enumerate(Fovp.lattice):
-            for j, column in enumerate(row):
-                Fovp.lattice[i][j].draw()
 
 
     @staticmethod
@@ -121,8 +115,6 @@ class Fovp:
             if food.rect.colliderect(Fovp.rect):
                Fovp.suspicious_food.append(food)
 
-    def draw(self):
-        pygame.draw.rect(window, self.color, self.rect)
 
     def scan(self):
 
@@ -232,19 +224,19 @@ class Obstacle(Game_Object):
             if head.colliderect(obstacle.rect):
                 game_score -= 1
 
-                if (keys[pygame.K_LEFT] or movement_direction == "left") and head_past_self.left + 2 > obstacle.rect.right:
+                if  movement_direction == "left" and head_past_self.left + 2 > obstacle.rect.right:
                     head_position = [obstacle.rect.right, head_position[1]]
                     head.topleft = head_position
 
-                if (keys[pygame.K_RIGHT] or movement_direction == "right") and head_past_self.right - 2 < obstacle.rect.left:
+                if  movement_direction == "right" and head_past_self.right - 2 < obstacle.rect.left:
                     head_position = [obstacle.rect.left - square_size[0], head_position[1]]
                     head.topleft = head_position
 
-                if (keys[pygame.K_UP] or movement_direction == "up") and head_past_self.top + 2 > obstacle.rect.bottom:
+                if  movement_direction == "up" and head_past_self.top + 2 > obstacle.rect.bottom:
                     head_position = [head_position[0], obstacle.rect.bottom]
                     head.topleft = head_position
 
-                if (keys[pygame.K_DOWN] or movement_direction == "down") and head_past_self.bottom - 2 < obstacle.rect.top:
+                if  movement_direction == "down" and head_past_self.bottom - 2 < obstacle.rect.top:
                     head_position = [head_position[0], obstacle.rect.top - square_size[1]]
                     head.topleft = head_position
 
@@ -253,29 +245,16 @@ class Obstacle(Game_Object):
 Obstacle.create(Obstacle)
 Food.create(Food)
 
-# Set up the display
-window = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption("Snake Game Grid")
+dt = 0.017
+game_turn = 0
 
-# Create a clock object
-clock = pygame.time.Clock()
-dt = 0
 # Main loop
 while True:
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    # Fill the background with black
-    window.fill((0, 175, 0))
-
-    # # Draw the grid
-    # for x in range(0, window_width, square_size[0]):
-    #     for y in range(0, window_height, square_size[1]):
-    #         rect = pygame.Rect(x, y, square_size[0], square_size[1])
-    #         pygame.draw.rect(window, (0, 0, 0), rect, 1)
+    game_turn +=1
+    print (f"game turn is {game_turn}",flush=True)
+    if game_turn == 20000:
+        print (f"the final score is {game_score}")
+        break
 
     #Refreshing the head movement tracking
     head_past_self = head.copy()
@@ -294,61 +273,33 @@ while True:
         action = random.choice(list(actions))
 
     movement_direction = action
-    # Keyboard control and head-obstacle collisions
-    keys = pygame.key.get_pressed()
 
-    if any(keys):
-        if keys[pygame.K_LEFT]:
-            head_position[0] = max(0, head_position[0] - dt * head_speed)
-            head_updater()
-        if keys[pygame.K_RIGHT]:
-            head_position[0] = min(window_width - square_size[0], head_position[0] + dt * head_speed)
-            head_updater()
-        if keys[pygame.K_UP]:
-            head_position[1] = max(0, head_position[1] - dt * head_speed)
-            head_updater()
-        if keys[pygame.K_DOWN]:
-            head_position[1] = min(window_height - square_size[1], head_position[1] + dt * head_speed)
-            head_updater()
-    else:
-        if  action == "left" :
-            head_position[0] = max(0, head_position[0] - dt * head_speed)
-            head_updater()
-        if  action == "right":
-            head_position[0] = min(window_width - square_size[0], head_position[0] + dt * head_speed)
-            head_updater()
-        if  action == "up":
-            head_position[1] = max(0, head_position[1] - dt * head_speed)
-            head_updater()
-        if  action == "down":
-            head_position[1] = min(window_height - square_size[1], head_position[1] + dt * head_speed)
-            head_updater()
+    # head-obstacle collisions
+
+    if  action == "left" :
+        head_position[0] = max(0, head_position[0] - dt * head_speed)
+        head_updater()
+    if  action == "right":
+        head_position[0] = min(window_width - square_size[0], head_position[0] + dt * head_speed)
+        head_updater()
+    if  action == "up":
+        head_position[1] = max(0, head_position[1] - dt * head_speed)
+        head_updater()
+    if  action == "down":
+        head_position[1] = min(window_height - square_size[1], head_position[1] + dt * head_speed)
+        head_updater()
 
     # Head-food collision
     if head_is_moving:
         for food in Food.list:
             if head.colliderect(food.rect):
-                game_score += 5
+                game_score += 50
                 food.generate_position()
-
-        # Draw the head
-    pygame.draw.rect(window, head_color, head)
-
-    # Draw the food
-    for food in Food.list:
-        pygame.draw.rect(window, Food.color, food.rect)
-
-    # Draw the Obstacles
-    for obstacle in Obstacle.list:
-        pygame.draw.rect(window, obstacle.color, obstacle.rect)
 
     # fov
     Fovp.update()
 
     l = 1
 
-    # Update the display
-    pygame.display.flip()
 
-    dt = clock.tick(60)/1000
 
