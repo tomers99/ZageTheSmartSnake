@@ -48,7 +48,7 @@ for x in itertools.product(states, actions):
 
 # Heads fov
 
-fov_diameter = 168
+fov_diameter = 170
 
 class Fovp:
     jump = 10
@@ -268,7 +268,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Fill the background with black
+    # Fill the background with green
     window.fill((0, 175, 0))
 
     #Refreshing the head movement tracking

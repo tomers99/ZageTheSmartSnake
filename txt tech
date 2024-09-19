@@ -1,85 +1,17 @@
-config, utils
-head, gmobj, fov
-genupds
+The number of fov points is 18 * 18 = 324.
+The number of weights per point is 5 * 4 = 20.
+therefore, each "creature" has 32,400 "genes".
 
-# utils
-random_2d_position_generator
+According to Python (which, I think, is lying!), step 1 sim takes about 2.5 seconds to run.
 
+- Optimizations:
+1. Reduce fov jump/ fov diameter.
+2. Head is stuck --> calculate score and exit.
+3. Numpy for numeric calculations.
+4. Parallelism.
+5. Increase head's speed?
+6. Reduce game time?
+7. Reduce game board?
 
-# config
-grid_size
-square_size
-window_width
-window_height
-
-head_position
-head_speed
-head_color
-
-fov_jump
-fov_radi
-
-food_size
-food_number
-food_color
-
-obstacle_size
-obstacle_number
-obstacle_color
-
-# head
-head_position
-head
-head_is_moving
-
-
-# gmobjetcs
-
-Game_Object
-generate_position
-__init__
-create
-color
-global_object_list
-number
-position
-rect
-size
-Food
-color
-list
-number
-size
-generate_position
-__init__
-create
-global_object_list
-position
-rect
-Obstacle
-head_obstacle_collisions_hander
-color
-list
-number
-size
-generate_position
-__init__
-create
-global_object_list
-position
-rect
-
-# fov
-fov_start
-k
-fov_points
-fov_rects
-
-update_fov
-draw_fov_rects
-head_is_moving_updater
-head_updater
-
-window
-clock
-dt
+- Things I want to do:
+1. Add border score penalty.
