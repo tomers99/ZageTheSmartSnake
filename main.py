@@ -213,7 +213,7 @@ class Game_Object:
 # Food properties
 class Food(Game_Object):
     size = [22, 22]
-    number = random.randint(20,35)
+    number = random.randint(70,100)
     color = (random.randint(200,245),random.randint(150,200),random.randint(40,100))
     list = []
 
@@ -237,7 +237,7 @@ class Obstacle(Game_Object):
                     head.topleft = head_position
 
                 if (keys[pygame.K_RIGHT] or movement_direction == "right") and head_past_self.right - 2 < obstacle.rect.left:
-                    head_position = [obstacle.rect.left - square_size[0], head_position[1]]
+                    head_position = [obstacle.rect.left - head_size[0], head_position[1]]
                     head.topleft = head_position
 
                 if (keys[pygame.K_UP] or movement_direction == "up") and head_past_self.top + 2 > obstacle.rect.bottom:
@@ -245,7 +245,7 @@ class Obstacle(Game_Object):
                     head.topleft = head_position
 
                 if (keys[pygame.K_DOWN] or movement_direction == "down") and head_past_self.bottom - 2 < obstacle.rect.top:
-                    head_position = [head_position[0], obstacle.rect.top - square_size[1]]
+                    head_position = [head_position[0], obstacle.rect.top - head_size[1]]
                     head.topleft = head_position
 
 
@@ -271,12 +271,6 @@ while True:
     # Fill the background with black
     window.fill((0, 175, 0))
 
-    # # Draw the grid
-    # for x in range(0, window_width, square_size[0]):
-    #     for y in range(0, window_height, square_size[1]):
-    #         rect = pygame.Rect(x, y, square_size[0], square_size[1])
-    #         pygame.draw.rect(window, (0, 0, 0), rect, 1)
-
     #Refreshing the head movement tracking
     head_past_self = head.copy()
     head_is_moving = True
@@ -284,8 +278,8 @@ while True:
     action = choose_action()
 
     # Prints
-    for action in actions:
-        print(actions[action])
+    for act in actions:
+        print(actions[act])
 
     print(max(actions, key=actions.get), max(actions.values()))
     print (game_score)
@@ -302,33 +296,33 @@ while True:
             head_position[0] = max(0, head_position[0] - dt * head_speed)
             head_updater()
         if keys[pygame.K_RIGHT]:
-            head_position[0] = min(window_width - square_size[0], head_position[0] + dt * head_speed)
+            head_position[0] = min(window_width - head_size[0], head_position[0] + dt * head_speed)
             head_updater()
         if keys[pygame.K_UP]:
             head_position[1] = max(0, head_position[1] - dt * head_speed)
             head_updater()
         if keys[pygame.K_DOWN]:
-            head_position[1] = min(window_height - square_size[1], head_position[1] + dt * head_speed)
+            head_position[1] = min(window_height - head_size[1], head_position[1] + dt * head_speed)
             head_updater()
     else:
         if  action == "left" :
             head_position[0] = max(0, head_position[0] - dt * head_speed)
             head_updater()
         if  action == "right":
-            head_position[0] = min(window_width - square_size[0], head_position[0] + dt * head_speed)
+            head_position[0] = min(window_width - head_size[0], head_position[0] + dt * head_speed)
             head_updater()
         if  action == "up":
             head_position[1] = max(0, head_position[1] - dt * head_speed)
             head_updater()
         if  action == "down":
-            head_position[1] = min(window_height - square_size[1], head_position[1] + dt * head_speed)
+            head_position[1] = min(window_height - head_size[1], head_position[1] + dt * head_speed)
             head_updater()
 
     # Head-food collision
     if head_is_moving:
         for food in Food.list:
             if head.colliderect(food.rect):
-                game_score += 5
+                game_score += 100
                 food.generate_position()
 
         # Draw the head
