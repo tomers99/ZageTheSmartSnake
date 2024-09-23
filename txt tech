@@ -1,17 +1,32 @@
-The number of fov points is 18 * 18 = 324.
+The number of fov points is 11 * 11 = 121.
 The number of weights per point is 5 * 4 = 20.
-therefore, each "creature" has 32,400 "genes".
+therefore, each "creature" has 2,420 "genes".
 
-According to Python (which, I think, is lying!), step 1 sim takes about 2.5 seconds to run.
+According to Python (which, I think, is lying!), step 1 sim currently takes about 0.5 seconds to run.
 
 - Optimizations:
-1. Reduce fov jump/ fov diameter.
-2. Head is stuck --> calculate score and exit.
-3. Numpy for numeric calculations.
-4. Parallelism.
-5. Increase head's speed?
-6. Reduce game time?
-7. Reduce game board?
+. Reduce fov jump/ fov diameter. V - significant
+. Remove the "head is moving" flag. V - insignificant
+. Check that head-things collisions are checked only within the fov rect. V - insignificant
+. Remove all the in-game prints (only in the real sim). V - moderately significant
+. Reduce game time (and increase head's speed). V Significant
+. Head is stuck --> calculate score and exit. V Significant.
+  I estimate that it reduced runtime by a factor of about 5/8.
+
+. Numpy for numeric calculations.
+. Parallelism.
+. Reduce game board?
+. lower AS scores?
+. Let each (fov point, state) pair support only one action?
 
 - Things I want to do:
 1. Add border score penalty.
+2. Graph the influence of factors on the time performances! :D
+
+
+---
+avg_time_counter
+
+    ptime0 = time.perf_counter()
+    avg_run_time += time.perf_counter() - ptime0
+    print(f"avg_run_time = {avg_run_time / game_turn}")

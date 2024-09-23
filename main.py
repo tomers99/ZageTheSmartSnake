@@ -19,9 +19,9 @@ window_rect = pygame.Rect(0,0,window_width,window_height)
 
 # Snake's head
 head_position = [400,400]
-head_speed = 2000
+head_speed = 300
 head_color = (100,0,0)
-head_size = (15,15)
+head_size = (40,40)
 head = pygame.Rect(head_position[0], head_position[1], head_size[0], head_size[1])
 head_is_moving = 0
 movement_direction = None
@@ -103,9 +103,9 @@ class Fovp:
                 for j, column in enumerate(row):
                     Fovp.lattice[i][j].scan()
 
-        for i, row in enumerate(Fovp.lattice):
-            for j, column in enumerate(row):
-                Fovp.lattice[i][j].draw()
+    #    for i, row in enumerate(Fovp.lattice):
+   #         for j, column in enumerate(row):
+  #              Fovp.lattice[i][j].draw()
 
 
     @staticmethod
@@ -212,14 +212,14 @@ class Game_Object:
 
 # Food properties
 class Food(Game_Object):
-    size = [22, 22]
+    size = [25, 25]
     number = random.randint(70,100)
     color = (random.randint(200,245),random.randint(150,200),random.randint(40,100))
     list = []
 
 # Obstacle properties
 class Obstacle(Game_Object):
-    size = [60, 60]
+    size = [50, 50]
     number = random.randint(50,65)
     color = (random.randint(30,80),random.randint(0,50),random.randint(130,255))
     list = []
@@ -275,20 +275,20 @@ while True:
     head_past_self = head.copy()
     head_is_moving = True
 
-    action = choose_action()
+    # action = choose_action()
 
-    # Prints
-    for act in actions:
-        print(actions[act])
+    # # Prints
+    # for act in actions:
+    #     print(actions[act])
 
-    print(max(actions, key=actions.get), max(actions.values()))
-    print (game_score)
+    # print(max(actions, key=actions.get), max(actions.values()))
+    # print (game_score)
 
-    if action == "random":
-        action = random.choice(list(actions))
+    # if action == "random":
+    #     action = random.choice(list(actions))
 
-    movement_direction = action
-    # Keyboard control and head-obstacle collisions
+    # movement_direction = action
+    # # Keyboard control and head-obstacle collisions
     keys = pygame.key.get_pressed()
 
     if any(keys):
@@ -304,19 +304,19 @@ while True:
         if keys[pygame.K_DOWN]:
             head_position[1] = min(window_height - head_size[1], head_position[1] + dt * head_speed)
             head_updater()
-    else:
-        if  action == "left" :
-            head_position[0] = max(0, head_position[0] - dt * head_speed)
-            head_updater()
-        if  action == "right":
-            head_position[0] = min(window_width - head_size[0], head_position[0] + dt * head_speed)
-            head_updater()
-        if  action == "up":
-            head_position[1] = max(0, head_position[1] - dt * head_speed)
-            head_updater()
-        if  action == "down":
-            head_position[1] = min(window_height - head_size[1], head_position[1] + dt * head_speed)
-            head_updater()
+    # else:
+    #     if  action == "left" :
+    #         head_position[0] = max(0, head_position[0] - dt * head_speed)
+    #         head_updater()
+    #     if  action == "right":
+    #         head_position[0] = min(window_width - head_size[0], head_position[0] + dt * head_speed)
+    #         head_updater()
+    #     if  action == "up":
+    #         head_position[1] = max(0, head_position[1] - dt * head_speed)
+    #         head_updater()
+    #     if  action == "down":
+    #         head_position[1] = min(window_height - head_size[1], head_position[1] + dt * head_speed)
+    #         head_updater()
 
     # Head-food collision
     if head_is_moving:
